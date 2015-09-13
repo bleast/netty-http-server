@@ -58,7 +58,7 @@ public class Example {
 }
 ```
 
-also remember to import your controller class in to spring, we can you annotation as follow
+also remember to import your controller class into spring, we can use annotation as follow
 
 ```xml
 // spring-test.xml
