@@ -80,7 +80,7 @@ Connection: keep-alive
 
 
 ```
-The response body as follow (just 
+The response body as follow
 
 ```java
 
