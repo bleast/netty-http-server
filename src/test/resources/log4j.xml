@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/" debug="false">
+
+	<appender name="console" class="org.apache.log4j.ConsoleAppender">
+		<layout class="org.apache.log4j.PatternLayout">
+			<!-- <param name="conversionPattern" value="%d{yyyy-MM-dd HH:mm:ss} %5p %l: %L - %m%n"/> -->
+			<param name="conversionPattern" value="%d{yyyy-MM-dd HH:mm:ss.SSS} %m%n" />
+		</layout>
+	</appender>
+
+	<appender name="file" class="org.apache.log4j.RollingFileAppender">
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="conversionPattern" value="%d{yyyy-MM-dd HH:mm:ss.SSS} %m%n" />
+		</layout>
+		<param name="file" value="logs/server-perf.log" />
+		<param name="append" value="true" />
+		<param name="maxFileSize" value="200MB" />
+		<param name="maxBackupIndex" value="10" />
+	</appender>
+
+	<appender name="static" class="org.perf4j.log4j.AsyncCoalescingStatisticsAppender">
+		<param name="timeSlice" value="10000" />
+		<appender-ref ref="file" />
+	</appender>
+
+	<logger name="org.perf4j.TimingLogger" additivity="false">
+		<level value="INFO" />
+		<appender-ref ref="static" />
+	</logger>
+
+	<root>
+		<level value="INFO" />
+		<appender-ref ref="console" />
+	</root>
+
+</log4j:configuration>
