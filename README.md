@@ -67,7 +67,7 @@ also remember to import your controller class into spring, we can use annotation
 
 ```
 
-4.No we can test it now. currently the controller only support ``post``method and the ``Test1Req``bean is initialize from a json string from the request body.mock http request as follow.
+4.Now we can test it now. currently the controller only support ``post``method and the ``Test1Req``bean is initialize from a json string from the request body.mock http request as follow.
 
 ```java
 
