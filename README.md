@@ -88,4 +88,4 @@ The response body as follow
 
 ```
 
-More information please sea the Example.java
+More information please see the Example.java
