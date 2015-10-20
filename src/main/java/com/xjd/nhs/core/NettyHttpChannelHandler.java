@@ -1,46 +1,23 @@
 package com.xjd.nhs.core;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.Charset;
+import java.util.*;
+
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.CompositeByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.handler.codec.http.ClientCookieEncoder;
-import io.netty.handler.codec.http.Cookie;
-import io.netty.handler.codec.http.CookieDecoder;
-import io.netty.handler.codec.http.DefaultHttpHeaders;
-import io.netty.handler.codec.http.DefaultHttpResponse;
-import io.netty.handler.codec.http.HttpChunkedInput;
-import io.netty.handler.codec.http.HttpContent;
-import io.netty.handler.codec.http.HttpHeaders;
-import io.netty.handler.codec.http.HttpMethod;
-import io.netty.handler.codec.http.HttpObject;
-import io.netty.handler.codec.http.HttpRequest;
-import io.netty.handler.codec.http.HttpResponseStatus;
-import io.netty.handler.codec.http.LastHttpContent;
-import io.netty.handler.codec.http.QueryStringDecoder;
-import io.netty.handler.codec.http.multipart.Attribute;
-import io.netty.handler.codec.http.multipart.DefaultHttpDataFactory;
-import io.netty.handler.codec.http.multipart.FileUpload;
-import io.netty.handler.codec.http.multipart.HttpDataFactory;
-import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder;
+import io.netty.handler.codec.http.*;
+import io.netty.handler.codec.http.multipart.*;
 import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder.ErrorDataDecoderException;
-import io.netty.handler.codec.http.multipart.InterfaceHttpData;
 import io.netty.handler.codec.http.multipart.InterfaceHttpData.HttpDataType;
 import io.netty.handler.stream.ChunkedFile;
 import io.netty.handler.stream.ChunkedInput;
 import io.netty.handler.stream.ChunkedStream;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.Charset;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
 
 import org.perf4j.log4j.Log4JStopWatch;
 import org.slf4j.Logger;
@@ -380,25 +357,29 @@ public class NettyHttpChannelHandler extends SimpleChannelInboundHandler<HttpObj
 	}
 
 	protected void decodeAttributes(HttpPostRequestDecoder decoder, NettyHttpRequest request) throws IOException {
-		while (decoder.hasNext()) {
-			InterfaceHttpData interfaceHttpData = decoder.next();
-			if (interfaceHttpData.getHttpDataType() == HttpDataType.Attribute) {
-				Attribute attribute = (Attribute) interfaceHttpData;
-				String name = attribute.getName();
-				String value = attribute.getValue();
+		try {
+			while (decoder.hasNext()) {
+				InterfaceHttpData interfaceHttpData = decoder.next();
+				if (interfaceHttpData.getHttpDataType() == HttpDataType.Attribute) {
+					Attribute attribute = (Attribute) interfaceHttpData;
+					String name = attribute.getName();
+					String value = attribute.getValue();
 
-				List<String> attrValues = request.getParameters().get(name);
-				if (attrValues == null) {
-					attrValues = new LinkedList<String>();
-					request.getParameters().put(name, attrValues);
+					List<String> attrValues = request.getParameters().get(name);
+					if (attrValues == null) {
+						attrValues = new LinkedList<String>();
+						request.getParameters().put(name, attrValues);
+					}
+					attrValues.add(value);
+
+				} else if (interfaceHttpData.getHttpDataType() == HttpDataType.FileUpload) {
+					FileUpload fileUpload = (FileUpload) interfaceHttpData;
+
+					request.getUploadedFiles().add(fileUpload);
 				}
-				attrValues.add(value);
-
-			} else if (interfaceHttpData.getHttpDataType() == HttpDataType.FileUpload) {
-				FileUpload fileUpload = (FileUpload) interfaceHttpData;
-
-				request.getUploadedFiles().add(fileUpload);
 			}
+		} catch (HttpPostRequestDecoder.EndOfDataDecoderException e) {
+			log.debug("", e);
 		}
 	}
 

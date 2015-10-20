@@ -177,6 +177,9 @@ public class HttpRequestRouter {
 							if (paramA.required()) {
 								throw new IllegalArgumentException("param '" + paramStr + "' required.");
 							}
+							if (paramType.isPrimitive()) {
+								throw new IllegalArgumentException("param '" + paramStr + "' required for primitive type '" + paramType.getName() + "'.");
+							}
 						} else {
 							if (paramType.equals(String.class)) {
 								// String
@@ -237,7 +240,7 @@ public class HttpRequestRouter {
 									// int
 									Object array = Array.newInstance(componentType, paramVal.size());
 									for (int i1 = 0; i1 < paramVal.size(); i1++) {
-										Integer it = Integer.valueOf(paramVal.get(0));
+										Integer it = Integer.valueOf(paramVal.get(i1));
 										Array.set(array, i1, it);
 									}
 									param = array;
@@ -246,7 +249,7 @@ public class HttpRequestRouter {
 									// long
 									Object array = Array.newInstance(componentType, paramVal.size());
 									for (int i1 = 0; i1 < paramVal.size(); i1++) {
-										Long it = Long.valueOf(paramVal.get(0));
+										Long it = Long.valueOf(paramVal.get(i1));
 										Array.set(array, i1, it);
 									}
 									param = array;
@@ -255,7 +258,7 @@ public class HttpRequestRouter {
 									// Byte
 									Object array = Array.newInstance(componentType, paramVal.size());
 									for (int i1 = 0; i1 < paramVal.size(); i1++) {
-										Byte it = Byte.valueOf(paramVal.get(0));
+										Byte it = Byte.valueOf(paramVal.get(i1));
 										Array.set(array, i1, it);
 									}
 									param = array;
@@ -264,7 +267,7 @@ public class HttpRequestRouter {
 									// Double
 									Object array = Array.newInstance(componentType, paramVal.size());
 									for (int i1 = 0; i1 < paramVal.size(); i1++) {
-										Double it = Double.valueOf(paramVal.get(0));
+										Double it = Double.valueOf(paramVal.get(i1));
 										Array.set(array, i1, it);
 									}
 									param = array;
@@ -273,7 +276,7 @@ public class HttpRequestRouter {
 									// Float
 									Object array = Array.newInstance(componentType, paramVal.size());
 									for (int i1 = 0; i1 < paramVal.size(); i1++) {
-										Float it = Float.valueOf(paramVal.get(0));
+										Float it = Float.valueOf(paramVal.get(i1));
 										Array.set(array, i1, it);
 									}
 									param = array;
@@ -282,7 +285,7 @@ public class HttpRequestRouter {
 									// Boolean
 									Object array = Array.newInstance(componentType, paramVal.size());
 									for (int i1 = 0; i1 < paramVal.size(); i1++) {
-										Boolean it = Boolean.valueOf(paramVal.get(0));
+										Boolean it = Boolean.valueOf(paramVal.get(i1));
 										Array.set(array, i1, it);
 									}
 									param = array;
