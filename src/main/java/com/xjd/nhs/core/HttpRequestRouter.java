@@ -3,6 +3,7 @@ package com.xjd.nhs.core;
 import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.handler.codec.http.multipart.FileUpload;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
@@ -23,6 +24,7 @@ import com.xjd.nhs.HttpRequest;
 import com.xjd.nhs.HttpResponse;
 import com.xjd.nhs.annotation.RequestBody;
 import com.xjd.nhs.annotation.RequestMapping;
+import com.xjd.nhs.annotation.RequestParam;
 
 public class HttpRequestRouter {
 	public static Logger log = LoggerFactory.getLogger(HttpRequestRouter.class);
@@ -105,30 +107,73 @@ public class HttpRequestRouter {
 				param = request;
 			} else {
 				Annotation[] pas = paramAnnos[i];
-				boolean hasBodyA = false;
 				RequestBody bodyA = null;
+				RequestParam paramA = null;
 				for (Annotation a : pas) {
 					if (a.annotationType().equals(RequestBody.class)) {
-						hasBodyA = true;
 						bodyA = (RequestBody) a;
+						break;
+					} else if (a.annotationType().equals(RequestParam.class)) {
+						paramA = (RequestParam) a;
 						break;
 					}
 				}
 
-				if (hasBodyA) {
+				if (bodyA != null) {
 					byte[] body = request.getBody();
 
 					if (body == null || body.length == 0) {
 						param = null;
 					} else if (String.class.equals(paramType)) {
+						// TODO 解析请求的charset
 						param = (new String(body, Charset.forName("utf8")));
 					} else if (paramType.isArray()
 							&& (byte.class.equals(paramType.getComponentType()) || Byte.class
 									.equals(paramType.getComponentType()))) {
 						param = (body);
 					} else {
-						Object paramObj = objectMapper.readValue(new String(body, Charset.forName("utf8")), paramType);
-						param = (paramObj);
+						// TODO 解析请求的charset
+						if (bodyA.objectMappingAs() == null || bodyA.objectMappingAs() == RequestBody.ObjectMappingAs.JSON) {
+							Object paramObj = objectMapper.readValue(new String(body, Charset.forName("utf8")), paramType);
+							param = (paramObj);
+						} else {
+							// TODO XML方式
+						}
+					}
+				} else if (paramA != null) {
+					String paramStr = paramA.value();
+					if (paramType.equals(FileUpload.class)) {
+						FileUpload fu = null;
+						if (paramStr != null && request.getUploadedFiles() != null) {
+							for (FileUpload f : request.getUploadedFiles()) {
+								if (paramStr.equals(f.getName())) {
+									fu = f;
+									break;
+								}
+							}
+						} else if (paramStr == null){
+							if (request.getUploadedFiles() != null && request.getUploadedFiles().size() > 1) {
+								throw new IllegalArgumentException("You must specify which uploaded file to be use.");
+							} else if (request.getUploadedFiles() != null) {
+								fu = request.getUploadedFiles().get(0);
+							}
+						}
+						if (fu == null && paramA.required()) {
+							throw new IllegalArgumentException("No uploaded file.");
+						}
+						param = fu;
+					} else if (paramType.isArray() && paramType.getComponentType().equals(FileUpload.class)) {
+						param = (request.getUploadedFiles() == null || request.getUploadedFiles().isEmpty()) ? null : request.getUploadedFiles().toArray(new FileUpload[0]);
+						if (param == null && paramA.required()) {
+							throw new IllegalArgumentException("No uploaded file.");
+						}
+					} else {
+						if (paramStr == null || paramStr.trim().equals("")) {
+							throw new IllegalArgumentException("You must specify 'value' for RequestParam.");
+						}
+						List<String> paramVal = request.getParameters().get(paramStr);
+						if (paramVal == null) {
+						}
 					}
 				}
 			}
