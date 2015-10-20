@@ -1,18 +1,19 @@
 package com.xjd.nhs.core;
 
-import io.netty.handler.codec.http.DefaultHttpHeaders;
-import io.netty.handler.codec.http.HttpHeaders;
-import io.netty.handler.codec.http.HttpResponseStatus;
-import io.netty.handler.codec.http.multipart.FileUpload;
-
 import java.io.IOException;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import io.netty.handler.codec.http.DefaultHttpHeaders;
+import io.netty.handler.codec.http.HttpHeaders;
+import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.handler.codec.http.multipart.FileUpload;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -172,7 +173,124 @@ public class HttpRequestRouter {
 							throw new IllegalArgumentException("You must specify 'value' for RequestParam.");
 						}
 						List<String> paramVal = request.getParameters().get(paramStr);
-						if (paramVal == null) {
+						if (paramVal == null || paramVal.isEmpty()) {
+							if (paramA.required()) {
+								throw new IllegalArgumentException("param '" + paramStr + "' required.");
+							}
+						} else {
+							if (paramType.equals(String.class)) {
+								// String
+								if (paramVal.size() > 1) {
+									throw new IllegalArgumentException("parameter '" + paramStr + "' is a array.");
+								}
+								param = paramVal.get(0);
+
+							} else if (paramType.equals(Integer.class) || paramType.equals(int.class)) {
+								// int
+								if (paramVal.size() > 1) {
+									throw new IllegalArgumentException("parameter '" + paramStr + "' is a array.");
+								}
+								param = Integer.valueOf(paramVal.get(0));
+
+							} else if (paramType.equals(Long.class) || paramType.equals(long.class)) {
+								// int
+								if (paramVal.size() > 1) {
+									throw new IllegalArgumentException("parameter '" + paramStr + "' is a array.");
+								}
+								param = Long.valueOf(paramVal.get(0));
+
+							} else if (paramType.equals(Byte.class) || paramType.equals(byte.class)) {
+								// int
+								if (paramVal.size() > 1) {
+									throw new IllegalArgumentException("parameter '" + paramStr + "' is a array.");
+								}
+								param = Byte.valueOf(paramVal.get(0));
+
+							} else if (paramType.equals(Double.class) || paramType.equals(double.class)) {
+								// int
+								if (paramVal.size() > 1) {
+									throw new IllegalArgumentException("parameter '" + paramStr + "' is a array.");
+								}
+								param = Double.valueOf(paramVal.get(0));
+
+							} else if (paramType.equals(Float.class) || paramType.equals(float.class)) {
+								// int
+								if (paramVal.size() > 1) {
+									throw new IllegalArgumentException("parameter '" + paramStr + "' is a array.");
+								}
+								param = Float.valueOf(paramVal.get(0));
+
+							} else if (paramType.equals(Boolean.class) || paramType.equals(boolean.class)) {
+								// int
+								if (paramVal.size() > 1) {
+									throw new IllegalArgumentException("parameter '" + paramStr + "' is a array.");
+								}
+								param = Boolean.valueOf(paramVal.get(0));
+
+							} else if (paramType.isArray()) {
+								Class<?> componentType = paramType.getComponentType();
+								if (componentType.equals(String.class)) {
+									// String
+									param = paramVal.toArray(new String[0]);
+
+								} else if (componentType.equals(Integer.class) || componentType.equals(int.class)) {
+									// int
+									Object array = Array.newInstance(componentType, paramVal.size());
+									for (int i1 = 0; i1 < paramVal.size(); i1++) {
+										Integer it = Integer.valueOf(paramVal.get(0));
+										Array.set(array, i1, it);
+									}
+									param = array;
+
+								} else if (componentType.equals(Long.class) || componentType.equals(long.class)) {
+									// long
+									Object array = Array.newInstance(componentType, paramVal.size());
+									for (int i1 = 0; i1 < paramVal.size(); i1++) {
+										Long it = Long.valueOf(paramVal.get(0));
+										Array.set(array, i1, it);
+									}
+									param = array;
+
+								} else if (componentType.equals(Byte.class) || componentType.equals(byte.class)) {
+									// Byte
+									Object array = Array.newInstance(componentType, paramVal.size());
+									for (int i1 = 0; i1 < paramVal.size(); i1++) {
+										Byte it = Byte.valueOf(paramVal.get(0));
+										Array.set(array, i1, it);
+									}
+									param = array;
+
+								} else if (componentType.equals(Double.class) || componentType.equals(double.class)) {
+									// Double
+									Object array = Array.newInstance(componentType, paramVal.size());
+									for (int i1 = 0; i1 < paramVal.size(); i1++) {
+										Double it = Double.valueOf(paramVal.get(0));
+										Array.set(array, i1, it);
+									}
+									param = array;
+
+								} else if (componentType.equals(Float.class) || componentType.equals(float.class)) {
+									// Float
+									Object array = Array.newInstance(componentType, paramVal.size());
+									for (int i1 = 0; i1 < paramVal.size(); i1++) {
+										Float it = Float.valueOf(paramVal.get(0));
+										Array.set(array, i1, it);
+									}
+									param = array;
+
+								} else if (componentType.equals(Boolean.class) || componentType.equals(boolean.class)) {
+									// Boolean
+									Object array = Array.newInstance(componentType, paramVal.size());
+									for (int i1 = 0; i1 < paramVal.size(); i1++) {
+										Boolean it = Boolean.valueOf(paramVal.get(0));
+										Array.set(array, i1, it);
+									}
+									param = array;
+								}
+
+							} else {
+								throw new IllegalArgumentException("cannot convert parameter '" + paramStr + "' to '" + paramType.getName() + "'.");
+							}
 						}
 					}
 				}
