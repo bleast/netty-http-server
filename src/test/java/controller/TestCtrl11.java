@@ -30,10 +30,15 @@ public class TestCtrl11 {
 	}
 
 	@RequestMapping(value = "/test3", supportMultipart = true)
-	public Object test3(@RequestParam(value = "name", required = true) String[] name, @RequestParam("age") Integer[] age, @RequestParam("isgood") boolean[] isgood,
+	public Object test3(@RequestParam(value = "name") String[] name, @RequestParam("age") Integer[] age, @RequestParam("isgood") boolean[] isgood,
 						@RequestParam("file") FileUpload fu) throws IOException {
 		System.out.println(Arrays.toString(name) + ", " + Arrays.toString(age) + ", " + Arrays.toString(isgood));
-		System.out.println(fu.getName() + ", " + fu.getFilename() + ", " + fu.getContentType() + ": " + fu.getString());
+		
+		try {
+			System.out.println(fu.getName() + ", " + fu.getFilename() + ", " + fu.getContentType() + ": " + fu.getString());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		return "OK";
 	}
 }

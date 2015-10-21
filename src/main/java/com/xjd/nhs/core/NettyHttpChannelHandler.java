@@ -179,6 +179,7 @@ public class NettyHttpChannelHandler extends SimpleChannelInboundHandler<HttpObj
 				HttpResponse response = router.route(request);
 				RequestHolder.clear();
 				write(ctx, request, response);
+				reset(); // 全部完成后reset一下,释放资源
 			}
 		}
 	}
@@ -379,7 +380,7 @@ public class NettyHttpChannelHandler extends SimpleChannelInboundHandler<HttpObj
 				}
 			}
 		} catch (HttpPostRequestDecoder.EndOfDataDecoderException e) {
-			log.debug("", e);
+			log.debug("{} occured: {}", "EndOfDataDecoderException", e);
 		}
 	}
 
